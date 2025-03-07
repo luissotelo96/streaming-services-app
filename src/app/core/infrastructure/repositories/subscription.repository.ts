@@ -7,26 +7,37 @@ import { Subscription } from "../../domain/models/subscription.model";
 export class SubscriptionRepository {
     private subscriptions: Subscription[] = [];
 
-    getSubscriptions(): Subscription[] {
+    public getById(subscriptionId: number): Subscription | undefined {
+        return this.subscriptions.find(s => s.getId() === subscriptionId);
+    }
+
+    public getSubscriptions(): Subscription[] {
         return this.subscriptions;
     }
 
-    addSubscription(subscription: Subscription): void {
+    public save(subscription: Subscription): void {
         this.subscriptions.push(subscription);
     }
 
-    updateSubscription(id: number, newSubscription: Subscription): void {
-        const index = this.subscriptions.findIndex(sub => sub.id === id);
+    public update(subscription: Subscription): void {
+        const index = this.subscriptions.findIndex(sub => sub.getId() === subscription.getId());
+        if (index !== -1) {
+            this.subscriptions[index] = subscription;
+        }
+    }
+
+    public change(subscriptionId: number, newSubscription: Subscription): void {
+        const index = this.subscriptions.findIndex(sub => sub.getId() === subscriptionId);
         if (index !== -1) {
             this.subscriptions[index] = newSubscription;
         }
     }
 
-    cancelSubscription(id: number): void {
-        this.subscriptions = this.subscriptions.filter(sub => sub.id !== id);
+    public cancel(subscriptionId: number): void {
+        this.subscriptions = this.subscriptions.filter(sub => sub.getId() !== subscriptionId);
     }
 
-    getSubscriptionsByCustomerId(customerId: number): Subscription[] {
+    public getByCustomerId(customerId: number): Subscription[] {
         return this.subscriptions;
     }
 }

@@ -54,7 +54,7 @@ export abstract class Subscription {
         return this.status;
     }
 
-    public getMonthlyCost() {
+    public getBaseCost() {
         return this.baseCost;
     }
 

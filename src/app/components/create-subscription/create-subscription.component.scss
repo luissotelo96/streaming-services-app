@@ -1,0 +1,59 @@
+.form-subscription {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3em;
+}
+
+.subscription-card {
+    padding: 20px;
+    width: 80%;
+}
+
+.title-center {
+    text-align: center;
+}
+
+.table-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2em
+}
+
+.full-width {
+    width: 100%;
+}
+
+.example-card {
+    max-width: 300px;
+}
+
+.example-header-image {
+    background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
+    background-size: cover;
+}
+
+table td {
+    padding: 1em;
+}
+
+.btn-subscribe {
+    display: flex;
+    width: 50%;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.go-back {
+    margin-top: 2em;
+    margin-left: 15em;
+}
+
+.plan-card-content {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}

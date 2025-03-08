@@ -1,0 +1,19 @@
+div.filters-bar {
+    align-content: center !important;
+    align-items: center !important;
+    background-color: #f5f5f5 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    padding: 5px !important;
+    margin-top: 20px;
+}
+
+div.filters-bar> :first-child {
+    margin-left: 20px !important;
+}
+
+div.filters-bar> :last-child {
+    margin-right: 10px !important;
+}

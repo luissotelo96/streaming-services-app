@@ -20,19 +20,19 @@ export abstract class PartiallyRefundableSubscription extends Subscription {
 
     private calculatePartialRefund(): number {
         const today = new Date();
-        const endDate = this.getEndDate();
+        const scheduleEndDate = this.startDate.setFullYear(this.startDate.getFullYear() + 1);
 
-        if (endDate === undefined) {
+        if (scheduleEndDate === undefined) {
             throw new Error('No fue posible obtener la fecha fin de la subscripción para reembolso parcial.')
         }
 
-        const remainingMonths = differenceInMonths(endDate, today);
+        const remainingMonths = differenceInMonths(scheduleEndDate, today);
         if (remainingMonths <= 0) {
             throw new Error('Subscripción expirada. No es posible realizar reembolso');
         }
 
-        const reaminingValue = this.getMonthlyCost() * remainingMonths;
-        const partialRefundPercentaje = this.getPlan().partialRefundPercentaje;
+        const reaminingValue = this.monthlyCost * remainingMonths;
+        const partialRefundPercentaje = this.plan.partialRefundPercentaje;
 
         return reaminingValue * partialRefundPercentaje;
     }

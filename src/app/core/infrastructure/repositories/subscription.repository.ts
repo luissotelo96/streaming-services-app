@@ -50,8 +50,7 @@ export class SubscriptionRepository {
         }
     ];
 
-    constructor(private subscriptionFactory: SubscriptionFactory) {
-    }
+    constructor() {}
 
     public save(subscription: Subscription): void {
         const newId = uuidv4();
@@ -85,6 +84,7 @@ export class SubscriptionRepository {
                 subscription.getEndDate()
             )
         }
+        console.log(this.subscriptions);
     }
 
     public change(subscriptionId: string, newSubscription: Subscription): void {

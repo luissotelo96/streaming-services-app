@@ -71,7 +71,7 @@
 
     <ng-container matColumnDef="partialRefund">
       <th mat-header-cell *matHeaderCellDef> Reembolso</th>
-      <td mat-cell *matCellDef="let element"> {{element.status === 'Canceled' ? element.partialRefund : 'N/A'}} </td>
+      <td mat-cell *matCellDef="let element"> {{element.partialRefund !== 0 ? element.partialRefund : 'N/A'}} </td>
     </ng-container>
 
     <ng-container matColumnDef="options">

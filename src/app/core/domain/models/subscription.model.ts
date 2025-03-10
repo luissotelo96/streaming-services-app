@@ -6,10 +6,10 @@ import { Customer } from './customer.model';
 export abstract class Subscription {
     private readonly id: string = "";
     private customer: Customer;
-    private status: SubscriptionStatusEnum;
-    private readonly plan: SubscriptionPlan;
-    private readonly startDate: Date;
-    private endDate?: Date;
+    protected status: SubscriptionStatusEnum;
+    protected readonly plan: SubscriptionPlan;
+    protected startDate: Date;
+    protected endDate?: Date;
     protected monthlyCost: number;
     protected totalCost: number = 0;
     protected partialRefund: number = 0;

@@ -1,10 +1,11 @@
 import { addMonths, getDate, getYear, isSameDay } from 'date-fns';
 import { SubscriptionStatusEnum } from '../enums/subscription-status.enum';
 import { SubscriptionPlan } from './subscription-plan.model';
+import { Customer } from './customer.model';
 
 export abstract class Subscription {
     private readonly id: string = "";
-    private readonly customerId: string;
+    private customer: Customer;
     private status: SubscriptionStatusEnum;
     private readonly plan: SubscriptionPlan;
     private readonly startDate: Date;
@@ -14,12 +15,12 @@ export abstract class Subscription {
     protected partialRefund: number = 0;
 
     constructor(
-        customerId: string,
+        customer: Customer,
         plan: SubscriptionPlan,
         startDate: Date,
         status: string = SubscriptionStatusEnum.ACTIVE
     ) {
-        this.customerId = customerId;
+        this.customer = customer;
         this.monthlyCost = plan.monthlyCost;
         this.plan = plan;
         this.status = this.parseEnum(SubscriptionStatusEnum, status);
@@ -45,8 +46,8 @@ export abstract class Subscription {
         return this.id;
     }
 
-    public getCustomerId() {
-        return this.customerId;
+    public getCustomer() {
+        return this.customer;
     }
 
     public getPlan() {

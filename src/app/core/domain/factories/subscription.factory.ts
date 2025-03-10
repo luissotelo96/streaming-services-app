@@ -7,6 +7,7 @@ import { DiscountStrategyContext } from "../strategies/subscription-discount/dis
 import { YearlyDiscountStrategy } from "../strategies/subscription-discount/yearly-discount.strategy";
 import { SubscriptionStatusEnum } from "../enums/subscription-status.enum";
 import { SubscriptionPlan } from "../models/subscription-plan.model";
+import { Customer } from "../models/customer.model";
 
 @Injectable({
     providedIn: 'root'
@@ -16,7 +17,7 @@ export class SubscriptionFactory {
     constructor(private discountStrategyContext: DiscountStrategyContext) { }
 
     createSubscription(
-        customerId: string,
+        customer: Customer,
         plan: SubscriptionPlan,
         paymentFrequency: string,
         startDate: Date,
@@ -25,9 +26,9 @@ export class SubscriptionFactory {
         switch (paymentFrequency) {
             case PaymentFrequencyEnum.YEARLY:
                 this.discountStrategyContext.setStrategy(new YearlyDiscountStrategy());
-                return new YearlySubscription(customerId, plan, startDate, status, this.discountStrategyContext);
+                return new YearlySubscription(customer, plan, startDate, status, this.discountStrategyContext);
             case PaymentFrequencyEnum.MONTHLY:
-                return new MonthlySubscription(customerId, plan, startDate, status);
+                return new MonthlySubscription(customer, plan, startDate, status);
             default:
                 throw new Error(`Frecuencia de pago ${paymentFrequency} no soportada.`)
         }

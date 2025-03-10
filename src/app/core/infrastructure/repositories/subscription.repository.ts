@@ -57,7 +57,7 @@ export class SubscriptionRepository {
         const newId = uuidv4();
         const newSubscriptionEntity: SubscriptionEntity = new SubscriptionEntity(
             newId,
-            subscription.getCustomerId(),
+            subscription.getCustomer().id,
             subscription.getPlan().name,
             subscription.getMonthlyCost(),
             subscription.getTotalCost(),
@@ -74,7 +74,7 @@ export class SubscriptionRepository {
         if (index !== -1) {
             this.subscriptions[index] = new SubscriptionEntity(
                 subscriptionId,
-                subscription.getCustomerId(),
+                subscription.getCustomer().id,
                 subscription.getPlan().name,
                 subscription.getMonthlyCost(),
                 subscription.getTotalCost(),
@@ -93,7 +93,7 @@ export class SubscriptionRepository {
             const newId = uuidv4();
             this.subscriptions[index] = new SubscriptionEntity(
                 newId,
-                newSubscription.getCustomerId(),
+                newSubscription.getCustomer().id,
                 newSubscription.getPlan().name,
                 newSubscription.getMonthlyCost(),
                 newSubscription.getTotalCost(),

@@ -1,16 +1,16 @@
-import { DiscountStrategyContext } from "../strategies/subscription-discount/discount-context.strategy";
+import { Customer } from "./customer.model";
 import { SubscriptionPlan } from "./subscription-plan.model";
 import { Subscription } from "./subscription.model";
 
 export class MonthlySubscription extends Subscription {
 
     constructor(
-        customerId: string,
+        customer: Customer,
         plan: SubscriptionPlan,
         startDate: Date,
         status: string
     ) {
-        super(customerId, plan, startDate, status);
+        super(customer, plan, startDate, status);
     }
 
 }

@@ -34,14 +34,13 @@ export class SubscriptionService {
   }
 
   public createSubscription(subscriptionDto: SubscriptionDTO): void {
-
+    const customer = new Customer(subscriptionDto.customer.id, subscriptionDto.customer.name, subscriptionDto.customer.email);
     const subscription = this.subscriptionFactory.createSubscription(
-      subscriptionDto.customer.id,
+      customer,
       this.mapPlanDTOToSubscriptionPlan(subscriptionDto.plan),
       subscriptionDto.paymentFrequency.name,
       new Date());
 
-    const customer = new Customer(subscriptionDto.customer.id, subscriptionDto.customer.name, subscriptionDto.customer.email);
     customer.addSubscription(this.subscriptionRepository, subscription);
 
     this.subscriptionRepository.save(subscription);
@@ -60,9 +59,10 @@ export class SubscriptionService {
   public changeSubscription(oldSubscriptionId: string, newSubscriptionDto: SubscriptionDTO): GetSubscriptionDTO {
     const oldSubscription = this.cancelSubscription(oldSubscriptionId);
     const newSubscriptionDate: Date = addDays(oldSubscription.endDate!, 1);
+    const customer = new Customer(newSubscriptionDto.customer.id, newSubscriptionDto.customer.name, newSubscriptionDto.customer.email);
 
     const newSubscription = this.subscriptionFactory.createSubscription(
-      newSubscriptionDto.customer.id,
+      customer,
       this.mapPlanDTOToSubscriptionPlan(newSubscriptionDto.plan),
       newSubscriptionDto.paymentFrequency.name,
       newSubscriptionDate,
@@ -108,7 +108,7 @@ export class SubscriptionService {
   }
 
   private mapSubscriptionToDTO(subscription: Subscription): GetSubscriptionDTO {
-    const customer = this.customerRepository.getById(subscription.getCustomerId());
+    const customer = this.customerRepository.getById(subscription.getCustomer().id);
     const plan = subscription.getPlan();
     return {
       id: subscription.getId(),
@@ -151,9 +151,11 @@ export class SubscriptionService {
   }
 
   private mapSubscriptionEntitytoSubscription(subscriptionEntity: SubscriptionEntity): Subscription {
+    const customerEntity = this.customerRepository.getById(subscriptionEntity.customerId);
+
     const plan = this.planRepository.getByName(subscriptionEntity.plan);
     return this.subscriptionFactory.createSubscription(
-      subscriptionEntity.customerId,
+      new Customer(customerEntity.id, customerEntity.name, customerEntity.email),
       new SubscriptionPlan(plan.name, plan.monthlyCost, plan.yearlyDiscount, plan.partialRefundPercentaje),
       subscriptionEntity.paymentFrecuency,
       subscriptionEntity.startDate

@@ -1,15 +1,16 @@
+import { Customer } from "./customer.model";
 import { SubscriptionPlan } from "./subscription-plan.model";
 import { Subscription } from "./subscription.model";
 import { differenceInMonths } from "date-fns";
 
 export abstract class PartiallyRefundableSubscription extends Subscription {
     constructor(
-        customerId: string,
+        customer: Customer,
         plan: SubscriptionPlan,
         startDate: Date,
         status: string
     ) {
-        super(customerId, plan, startDate, status);
+        super(customer, plan, startDate, status);
     }
 
     public override cancel(): void {

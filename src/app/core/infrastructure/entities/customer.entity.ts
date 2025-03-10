@@ -1,9 +1,7 @@
 export class CustomerEntity {
     constructor(
-        public id: number,
+        public id: string,
         public name: string,
         public email: string
-    ) {
-
-    }
+    ) { }
 }

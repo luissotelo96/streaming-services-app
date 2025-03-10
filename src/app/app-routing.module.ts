@@ -6,6 +6,7 @@ import { CreateSubscriptionComponent } from './components/create-subscription/cr
 const routes: Routes = [
     { path: 'subscription', component: SubscriptionComponent },
     { path: 'create-subscription', component: CreateSubscriptionComponent },
+    { path: 'create-subscription/:id', component: CreateSubscriptionComponent },
     { path: '', redirectTo: '/subscription', pathMatch: 'full' }
 ];
 

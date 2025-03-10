@@ -12,13 +12,13 @@ export class DiscountStrategyContext {
         this.strategy = strategy;
     }
 
-    public executeStrategy(baseCost: number): number {
+    public executeStrategy(baseCost: number, discountPercentaje: number): number {
 
         if (!this.strategy) {
             throw new Error("No se ha establecido una estrategia de descuento.");
         }
 
-        return this.strategy.applyDiscount(baseCost);
+        return this.strategy.applyDiscount(baseCost, discountPercentaje);
     }
 
 }

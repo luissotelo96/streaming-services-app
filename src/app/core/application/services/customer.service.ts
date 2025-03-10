@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { CustomerRepository } from "../../infrastructure/repositories/customer-repository";
-import { GetCustomerDTO } from "../dtos/get-customer-dto.model";
+import { CustomerRepository } from "../../infrastructure/repositories/customer.repository";
+import { CustomerDTO } from "../dtos/customer.dto";
 
 @Injectable({
     providedIn: 'root'
@@ -9,7 +9,7 @@ export class CustomerService {
 
     constructor(private customerRepository: CustomerRepository) { }
 
-    public getCustomerByEmail(email: string): GetCustomerDTO {
+    public getCustomerByEmail(email: string): CustomerDTO {
         const customer = this.customerRepository.getByEmail(email);
         return {
             id: customer.id,

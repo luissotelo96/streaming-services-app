@@ -1,6 +1,7 @@
-<form [formGroup]="subscriptionForm" (ngSubmit)="createSubscription()">
+<form [formGroup]="subscriptionForm" (ngSubmit)="this.subscriptionId ? changeSubscription() : createSubscription()">
     <div class="go-back">
-        <button mat-raised-button class="btn-back" color="primary" (click)="goBackToSubscription()">Volver</button>
+        <button mat-raised-button class="btn-back" color="primary" (click)="goBackToSubscription()"
+            type="button">Volver</button>
     </div>
     <div class="form-subscription">
         <mat-card class="subscription-card">
@@ -13,8 +14,6 @@
                             <mat-card-header>
                                 <mat-card-title>{{ plan.name }}</mat-card-title>
                             </mat-card-header>
-                            <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg"
-                                alt="Photo of a Shiba Inu">
                             <mat-card-content class="plan-card-content">
                                 <mat-card-title>{{ plan.monthlyCost | currency }} / mes </mat-card-title>
                                 <p>
@@ -23,7 +22,8 @@
                                 </p>
                             </mat-card-content>
                             <mat-card-actions>
-                                <button mat-button color="primary" (click)="selectPlan(plan)">Seleccionar</button>
+                                <button mat-button color="primary" (click)="selectPlan(plan)"
+                                    type="button">Seleccionar</button>
                             </mat-card-actions>
                         </mat-card>
                     </div>
@@ -32,16 +32,22 @@
                 <mat-divider class="m-4"></mat-divider>
 
                 <h2>Información del cliente</h2>
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Buscar</mat-label>
-                    <input matInput formControlName="customerEmail" placeholder="Ingrese el email"
-                        (keyup.enter)="searchCustomer()">
-                </mat-form-field>
+                <div *ngIf="this.subscriptionId === null" class="customer-searcher-container">
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Buscar</mat-label>
+                        <input matInput formControlName="customerEmail" placeholder="Ingrese el email">
+                        <mat-error *ngIf="subscriptionForm.get('customerEmail')?.hasError('email')">
+                            Ingrese un email válido
+                        </mat-error>
+                    </mat-form-field>
+                    <button mat-raised-button class="btn-back m-2" color="primary" (click)="searchCustomer()"
+                        type="button">Buscar</button>
+                </div>
                 <mat-card>
                     <mat-card-content>
                         <div class="row">
-                            <div class="col-md-4"> <b>Nombre Cliente: </b> {{customer.name}}</div>
-                            <div class="col-md-4"> <b>Email: {{customer.email}}</b></div>
+                            <div class="col-md-4"> <b>Nombre Cliente: </b> {{customer?.name}}</div>
+                            <div class="col-md-4"> <b>Email: {{customer?.email}}</b></div>
                         </div>
                     </mat-card-content>
                 </mat-card>
@@ -68,7 +74,7 @@
                                 <mat-label>Selecciona la frecuencia de pago</mat-label>
                                 <mat-select formControlName="paymentFrequency">
                                     <mat-option *ngFor="let frequency of paymentFrequencies" [value]="frequency">
-                                        {{ frequency }}
+                                        {{ frequency.name }}
                                     </mat-option>
                                 </mat-select>
                                 <mat-error *ngIf="subscriptionForm.get('paymentFrequency')?.hasError('required')">
@@ -80,7 +86,8 @@
                 </table>
 
                 <div class="button-container">
-                    <button mat-raised-button class="btn-subscribe" color="primary">Suscribirse</button>
+                    <button mat-raised-button class="btn-subscribe" color="primary">{{this.subscriptionId ? 'Actualizar subscripción'
+                        : 'Suscribir' }}</button>
                 </div>
             </mat-card-content>
         </mat-card>

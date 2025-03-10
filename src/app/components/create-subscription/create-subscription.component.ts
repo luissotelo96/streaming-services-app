@@ -1,12 +1,17 @@
 import { Component, OnInit } from '@angular/core';
+import Swal from 'sweetalert2';
 import { FormBuilder, Validators, FormGroup } from "@angular/forms";
-import { Router } from '@angular/router';
-import { SubscriptionPlanDTO } from '../../core/application/dtos/subscription-plan-dto.enum';
-import { PaymentFrequencyDTO } from '../../core/application/dtos/payment-frequency-dto.model';
+import { ActivatedRoute, Router } from '@angular/router';
+import { formatDate } from '@angular/common';
+
+import { SubscriptionPlanDTO } from '../../core/application/dtos/subscription-plan.dto';
+import { PaymentFrequencyDTO } from '../../core/application/dtos/payment-frequency.dto';
 import { SubscriptionService } from '../../core/application/services/subscription.service';
 import { CustomerService } from '../../core/application/services/customer.service';
-import { GetCustomerDTO } from '../../core/application/dtos/get-customer-dto.model';
-import Swal from 'sweetalert2';
+import { CustomerDTO } from '../../core/application/dtos/customer.dto';
+import { SubscriptionDTO } from '../../core/application/dtos/subscription.dto';
+import { GetSubscriptionDTO } from '../../core/application/dtos/get-subscription.dto';
+import { PlanService } from '../../core/application/services/plan.service';
 
 @Component({
   selector: 'app-create-subscription',
@@ -15,56 +20,56 @@ import Swal from 'sweetalert2';
 })
 export class CreateSubscriptionComponent implements OnInit {
   subscriptionForm!: FormGroup;
-  subscriptionPlans: SubscriptionPlanDTO[] = [
-    { name: "Basic", monthlyCost: 15000, yearlyDiscount: 10 },
-    { name: "Standard", monthlyCost: 20000, yearlyDiscount: 15 },
-    { name: "Premium", monthlyCost: 30000, yearlyDiscount: 20 },
-  ];
-  paymentFrequencies: PaymentFrequencyDTO[] = [
-    PaymentFrequencyDTO.Monthly,
-    PaymentFrequencyDTO.Yearly
-  ];
-  customer!: GetCustomerDTO;
+
+  subscriptionPlans: SubscriptionPlanDTO[] = [];
+
+  readonly paymentFrequencies: PaymentFrequencyDTO[] = [
+    { name: 'Monthly' },
+    { name: 'Yearly' }
+  ]
+
+  customer?: CustomerDTO | undefined = undefined;
+  subscriptionId: string | null = null;
 
   constructor(
-    private formBuilder: FormBuilder,
-    private router: Router,
-    private subscriptionService: SubscriptionService,
-    private customerService: CustomerService
+    private readonly formBuilder: FormBuilder,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly subscriptionService: SubscriptionService,
+    private readonly customerService: CustomerService,
+    private readonly planService: PlanService
   ) {
     this.subscriptionForm = this.formBuilder.group({
+      customerName: ["", [Validators.required]],
       customerEmail: ["", [Validators.required, Validators.email]],
       subscriptionPlan: [null, [Validators.required]],
-      paymentFrequency: ["", [Validators.required]]
+      paymentFrequency: [null, [Validators.required]]
     });
   }
 
   ngOnInit() {
+    this.route.paramMap.subscribe(params => {
+      this.subscriptionId = params.get('id');
+      if (this.subscriptionId) {
+        this.loadSubscription(this.subscriptionId);
+      }
+    });
 
+    this.getPlans();
   }
 
   searchCustomer(): void {
-    const email = this.subscriptionForm.get('numRazonSocial')?.value;
-    if (!email) {
-      Swal.fire('Error', 'Por favor, ingrese un email válido.', 'error');
-      return;
+    try {
+      const email = this.subscriptionForm.get('customerEmail')?.value;
+      this.customer = this.customerService.getCustomerByEmail(email);
+      if (this.customer) {
+        this.subscriptionForm.patchValue({ customerName: this.customer.name });
+        this.subscriptionForm.patchValue({ customerEmail: this.customer.email });
+      }
     }
-
-    this.customer = this.customerService.getCustomerByEmail(email);
-    // this.clientService.getClientByEmail(email).subscribe(
-    //   (client) => {
-    //     if (client) {
-    //       this.clientData = client;
-    //     } else {
-    //       this.clientData = null;
-    //       Swal.fire('No encontrado', 'No se encontró ningún cliente con ese email.', 'warning');
-    //     }
-    //   },
-    //   (error) => {
-    //     console.error('Error al buscar cliente:', error);
-    //     Swal.fire('Error', 'Hubo un problema al buscar el cliente.', 'error');
-    //   }
-    // );
+    catch (error) {
+      Swal.fire('Error', `${error}`, 'error');
+    }
   }
 
   goBackToSubscription(): void {
@@ -76,6 +81,78 @@ export class CreateSubscriptionComponent implements OnInit {
   }
 
   createSubscription(): void {
+    if (!this.isFormValid()) return;
+
+    try {
+      const subscriptionDto = this.createSubscriptionDto();
+      this.subscriptionService.createSubscription(subscriptionDto);
+      Swal.fire({
+        title: '¡Éxito!',
+        text: 'La suscripción se ha creado correctamente.',
+        icon: 'success',
+        confirmButtonText: 'Aceptar'
+      });
+      this.router.navigate(['/subscription']);
+    }
+    catch (error) {
+      Swal.fire('Error', `${error}`, 'error');
+    }
 
   }
+
+  changeSubscription(): void {
+    if (!this.subscriptionId || !this.isFormValid()) return;
+
+    try {
+      const subscriptionDto = this.createSubscriptionDto();
+      const result: GetSubscriptionDTO = this.subscriptionService.changeSubscription(this.subscriptionId, subscriptionDto);
+      if (result.endDate) {
+        Swal.fire({
+          title: '¡Éxito!',
+          text: `La suscripción se ha actualizado correctamente. Su subscripción actual estará vigente hasta: ${formatDate(result.endDate, 'dd/MM/yyyy', 'en-Es')}`,
+          icon: 'success',
+          confirmButtonText: 'Aceptar'
+        });
+        this.router.navigate(['/subscription']);
+      }
+    }
+    catch (error) {
+      Swal.fire('Error', `${error}`, 'error');
+    }
+  }
+
+  private loadSubscription(subscriptionId: string) {
+    const subscription = this.subscriptionService.getSubscriptionById(subscriptionId);
+    if (subscription) {
+      this.customer = subscription.customer;
+      this.subscriptionForm.patchValue({
+        customerName: subscription.customer.name,
+        customerEmail: subscription.customer.email,
+        subscriptionPlan: this.subscriptionPlans.find(p => p.name === subscription.plan.name),
+        paymentFrequency: subscription.paymentFrequency
+      });
+    }
+  }
+
+  private getPlans(): void {
+    this.subscriptionPlans = this.planService.getPlans();
+  }
+
+  private isFormValid(): boolean {
+    return this.subscriptionForm.valid && !!this.customer;
+  }
+
+
+  private createSubscriptionDto(): SubscriptionDTO {
+    return {
+      customer: {
+        id: this.customer!.id,
+        name: this.customer!.name,
+        email: this.customer!.email
+      },
+      plan: this.subscriptionForm.get('subscriptionPlan')!.value,
+      paymentFrequency: this.subscriptionForm.get('paymentFrequency')!.value
+    } as SubscriptionDTO;
+  }
+
 }

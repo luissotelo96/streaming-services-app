@@ -1,41 +1,44 @@
-import { addMonths, getDate, getYear } from 'date-fns';
+import { addMonths, getDate, getYear, isSameDay } from 'date-fns';
 import { SubscriptionStatusEnum } from '../enums/subscription-status.enum';
-import { SubscriptionPlanEnum } from '../enums/suscription-plan.enum';
-import { DiscountStrategyContext } from '../strategies/discount-context.strategy';
+import { SubscriptionPlan } from './subscription-plan.model';
 
 export abstract class Subscription {
-    private readonly id: number = 0;
-    private customerId: number;
-    private plan: SubscriptionPlanEnum;
+    private readonly id: string = "";
+    private readonly customerId: string;
     private status: SubscriptionStatusEnum;
-    private baseCost: number;
-    private finalCost: number;
-    private startDate: Date;
+    private readonly plan: SubscriptionPlan;
+    private readonly startDate: Date;
     private endDate?: Date;
+    protected monthlyCost: number;
+    protected totalCost: number = 0;
+    protected partialRefund: number = 0;
 
     constructor(
-        customerId: number,
-        plan: string,
-        baseCost: number,
+        customerId: string,
+        plan: SubscriptionPlan,
         startDate: Date,
-        protected discountStrategy: DiscountStrategyContext
+        status: string = SubscriptionStatusEnum.ACTIVE
     ) {
         this.customerId = customerId;
-        this.baseCost = baseCost;
-        this.plan = this.parseEnum(SubscriptionPlanEnum, plan);
-        this.status = SubscriptionStatusEnum.Active;
+        this.monthlyCost = plan.monthlyCost;
+        this.plan = plan;
+        this.status = this.parseEnum(SubscriptionStatusEnum, status);
         this.startDate = startDate;
-
-        this.finalCost = this.calculateTotalCost();
     }
 
     public cancel(): void {
-        const nextMonthDate = addMonths(new Date(), 1);
-        this.endDate = new Date(getYear(nextMonthDate), nextMonthDate.getMonth(), getDate(this.startDate));
+        const today = new Date();
+        const endDate = this.calculateEndDate(today);
+
+        if (isSameDay(today, endDate)) {
+            this.status = SubscriptionStatusEnum.CANCELED;
+        }
+        this.endDate = this.calculateEndDate(today);
     }
 
-    private calculateTotalCost(): number {
-        return this.discountStrategy.executeStrategy(this.baseCost);
+    private calculateEndDate(today: Date): Date {
+        const nextMonthDate = addMonths(new Date(today), 1);
+        return new Date(getYear(nextMonthDate), nextMonthDate.getMonth(), getDate(this.startDate));
     }
 
     public getId() {
@@ -54,12 +57,12 @@ export abstract class Subscription {
         return this.status;
     }
 
-    public getBaseCost() {
-        return this.baseCost;
+    public getMonthlyCost() {
+        return this.monthlyCost;
     }
 
-    public getFinalCost() {
-        return this.finalCost;
+    public getTotalCost() {
+        return this.totalCost;
     }
 
     public getStartDate() {
@@ -68,6 +71,10 @@ export abstract class Subscription {
 
     public getEndDate() {
         return this.endDate;
+    }
+
+    public getPartialRefund() {
+        return this.partialRefund;
     }
 
     private parseEnum<T extends Record<string, string | number>>(enumType: T, value: string): T[keyof T] {
